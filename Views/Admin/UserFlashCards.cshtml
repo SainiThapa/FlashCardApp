@@ -1,0 +1,34 @@
+@model IEnumerable<FlashcardApp.Models.FlashCard>
+@{
+    var userId = ViewBag.UserId;
+}
+
+<h2>User Flashcards</h2>
+
+<form asp-action="DeleteSelectedFlashCards" method="post">
+    <input type="hidden" name="userId" value="@userId" />
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Select</th>
+                <th>Category</th>
+                <th>Question</th>
+                <th>Answer</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var flashCard in Model)
+            {
+                <tr>
+                    <td><input type="checkbox" name="flashCardIds" value="@flashCard.Id" /></td>
+                    <td>@ViewBag.CategoryNames[flashCard.CategoryId]</td>
+                    <td>@flashCard.Question</td>
+                    <td>@flashCard.Answer</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <input type="hidden" name="userId" value="@ViewBag.UserId" />
+    <button type="submit" class="btn btn-danger">Delete Selected Flashcards</button>
+    <a href="@Url.Action("UserList", "Admin")" class="btn btn-secondary">Back to User List</a>
+</form>
