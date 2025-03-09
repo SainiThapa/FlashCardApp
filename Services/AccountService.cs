@@ -30,6 +30,12 @@ namespace FlashcardApp.Services
         // Register a new user
         public async Task<IdentityResult> RegisterUserAsync(RegisterViewModel model, ClaimsPrincipal currentUser)
         {
+            var existingUser = await _userManager.FindByEmailAsync(model.Email);
+            if (existingUser != null)
+            {
+                return IdentityResult.Failed(new IdentityError { Description = "A user with this email already exists." });
+            }
+
             var user = new ApplicationUser
             {
                 UserName = model.Email,
@@ -41,7 +47,6 @@ namespace FlashcardApp.Services
             var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
-                // Sign in the user after successful registration (optional)
                 await EnsureRoleExistsAsync("User");
                 await _userManager.AddToRoleAsync(user, "User");
                 if (!currentUser.Identity.IsAuthenticated)

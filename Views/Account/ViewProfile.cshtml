@@ -3,7 +3,7 @@
 <div class="container mt-5">
     <div class="card shadow-lg">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h3 class="mb-0">User Profile</h3>
+            <h3 class="mb-0">Your Profile</h3>
             <a asp-action="EditProfile" class="btn btn-light text-primary">
                 <i class="fas fa-edit"></i> Edit Profile
             </a>
@@ -11,7 +11,7 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-md-3 text-center">
-                    <img src="https://via.placeholder.com/150" class="rounded-circle img-thumbnail mb-3"
+                    <img src="logo.png" class="rounded-circle img-thumbnail mb-3"
                         alt="Profile Picture">
                 </div>
                 <div class="col-md-9">
@@ -29,7 +29,7 @@
                             <strong>Email: </strong> @Model.Email
                         </li>
                         <li class="mb-2">
-                            <strong>Total Tasks: </strong> @Model.TaskCount
+                            <strong>Total cards: </strong> @Model.TaskCount
                         </li>
                     </ul>
                 </div>

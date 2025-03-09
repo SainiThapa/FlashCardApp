@@ -66,6 +66,10 @@ namespace FlashcardApp.Controllers
             {
                 await EnsureRoleExistsAsync("User");
                 await _userManager.AddToRoleAsync(user, "User");
+                if (Request.Headers["X-Source"].FirstOrDefault() == "MobileApp")
+                {
+                    Console.WriteLine($"Registration successful: User {model.Email} registered from MobileApp at {DateTime.Now}");
+                }
                 return Ok(new { message = "Registration successful" });
             }
 
@@ -84,10 +88,15 @@ namespace FlashcardApp.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginDto userLogin)
         {
+            Console.WriteLine(userLogin.Email);
             var validation = await IsValidUser(userLogin);
             if (validation)
             {
                 var token = GenerateJwtToken(userLogin.Email);
+                if (Request.Headers["X-Source"].FirstOrDefault() == "MobileApp")
+                {
+                    Console.WriteLine($"Login successful: User {userLogin.Email} logged in from MobileApp at {DateTime.Now}");
+                }
                 return Ok(new { Token = token });
             }
             return Unauthorized();
@@ -104,6 +113,10 @@ namespace FlashcardApp.Controllers
                     return Unauthorized("Access denied. Admins only.");
 
                 var token = GenerateJwtToken(userLogin.Email);
+                if (Request.Headers["X-Source"].FirstOrDefault() == "MobileApp")
+                {
+                    Console.WriteLine($"Admin Login successful: User {userLogin.Email} logged in from MobileApp at {DateTime.Now}");
+                }
                 return Ok(new { Token = token });
             }
             return Unauthorized("Invalid login credentials.");
@@ -140,7 +153,7 @@ namespace FlashcardApp.Controllers
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        [Authorize]
+        // [Authorize]
         [HttpGet("users")]
         public async Task<ActionResult<IEnumerable<ApplicationUser>>> GetAllUsers()
         {

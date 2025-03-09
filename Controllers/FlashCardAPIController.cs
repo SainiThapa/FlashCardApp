@@ -171,5 +171,32 @@ namespace FlashcardApp.Controllers
 
             return Ok(viewModel);
         }
+
+        [HttpGet("All")]
+        public async Task<ActionResult<IEnumerable<GetFlashCardViewModel>>> GetAllFlashCards()
+        {
+            // Retrieve all flashcards without user filtering
+            var allFlashCards = await _context.FlashCards
+                .Include(f => f.Category)
+                .ToListAsync();
+
+            if (allFlashCards == null || !allFlashCards.Any())
+                return NotFound("No flashcards found in the database.");
+
+            var flashCardViewModels = allFlashCards.Select(flashCard => new GetFlashCardViewModel
+            {
+                Id = flashCard.Id,
+                CategoryName = flashCard.Category?.Name ?? "Unknown",
+                Question = flashCard.Question,
+                Answer = flashCard.Answer,
+                UserId = flashCard.UserId
+            }).ToList();
+
+            return Ok(new
+            {
+                TotalCount = flashCardViewModels.Count,
+                Flashcards = flashCardViewModels
+            });
+        }
     }
 }
