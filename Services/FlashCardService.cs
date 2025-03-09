@@ -22,7 +22,7 @@ namespace FlashcardApp.Services
         {
             return await _context.FlashCards
                 .Where(f => f.UserId == userId)
-                .ToListAsync() ?? new List<FlashCard>(); // CS8603 fix
+                .ToListAsync() ?? new List<FlashCard>();
         }
 
         public async Task<FlashCard> CreateFlashCardAsync(FlashCard flashCard, string userId)
@@ -45,7 +45,7 @@ namespace FlashcardApp.Services
             existingFlashCard.Question = flashCard.Question;
             existingFlashCard.Answer = flashCard.Answer;
             await _context.SaveChangesAsync();
-            return existingFlashCard; // CS8603 fix with potential null
+            return existingFlashCard;
         }
 
         public async Task<bool> DeleteFlashCardAsync(int id, string userId)
@@ -61,7 +61,7 @@ namespace FlashcardApp.Services
 
         public async Task<FlashCard> GetFlashCardByIdAsync(int id)
         {
-            return await _context.FlashCards.FindAsync(id) ?? throw new InvalidOperationException("Flashcard not found");
+            return await _context.FlashCards.FindAsync(id); // Removed exception, returning null if not found
         }
 
         public async Task<FlashCardViewModel> GetRandomFlashCardAsync(string userId, int? categoryId = null)
@@ -79,20 +79,32 @@ namespace FlashcardApp.Services
             var random = new Random();
             var flashCard = filteredFlashCards[random.Next(filteredFlashCards.Count)];
             var category = await _context.Categories
-                .FirstOrDefaultAsync(c => c.Id == flashCard.CategoryId && c.UserId == userId);
+                .FirstOrDefaultAsync(c => c.Id == flashCard.CategoryId); // Removed UserId check
             return new FlashCardViewModel
             {
                 Id = flashCard.Id,
-                CategoryName = category.Name!= null ? category.Name : "Unknown",
+                CategoryName = category?.Name ?? "Unknown",
                 Question = flashCard.Question,
                 Answer = flashCard.Answer
             };
         }
-        public async Task<Dictionary<int, string>> GetCategoriesAsync(string userId)
-        {
-            return await _context.Categories
-                .Where(c => c.UserId == userId)
-                .ToDictionaryAsync(c => c.Id, c => c.Name) ?? new Dictionary<int, string>();
-        }
+
+        // public async Task<Dictionary<int, string>> GetCategoriesAsync()         
+        // {
+        //     return await _context.Categories
+        //         .ToDictionaryAsync(c => c.Id, c => c.Name) ?? new Dictionary<int, string>();
+        // }
+
+        // public async Task<List<Category>> GetAllCategoriesAsync()
+        // {
+        //     return await _context.Categories
+        //         .ToListAsync(); 
+        // }
+
+        // public async Task AddCategoryAsync(Category category)
+        // {
+        //     _context.Categories.Add(category);
+        //     await _context.SaveChangesAsync();
+        // }
     }
 }

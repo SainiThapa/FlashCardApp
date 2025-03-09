@@ -1,0 +1,69 @@
+1. Vocabulary
+Purpose: Test word meanings, synonyms, or translations.
+Examples:
+Question: "What’s a synonym for 'fast'?" Answer: "Quick"
+Question: "What does 'benevolent' mean?" Answer: "Kind"
+Question: "What word means 'to sleep' in Spanish?" Answer: "Dormir"
+
+2. Math Basics
+Purpose: Practice fundamental math operations or concepts.
+Examples:
+Question: "What is 5 × 6?" Answer: "30"
+Question: "What’s the square of 7?" Answer: "49"
+Question: "How many sides does a triangle have?" Answer: "Three"
+
+3. History One-Word
+Purpose: Memorize key historical figures, events, or dates.
+Examples:
+Question: "Who invented the light bulb?" Answer: "Edison"
+Question: "What year did the Titanic sink?" Answer: "1912"
+Question: "Who led the French Revolution?" Answer: "Robespierre"
+
+4. Science Snapshots
+Purpose: Quick recall of scientific terms or facts.
+Examples:
+Question: "What element is 'Fe'?" Answer: "Iron"
+Question: "What planet is closest to the Sun?" Answer: "Mercury"
+Question: "What’s the basic unit of life?" Answer: "Cell"
+
+5. Geography
+Purpose: Test knowledge of places or geographical features.
+Examples:
+Question: "What’s the capital of Australia?" Answer: "Canberra"
+Question: "Which continent is Egypt in?" Answer: "Africa"
+Question: "What’s the longest river in South America?" Answer: "Amazon"
+
+6. General Trivia
+Purpose: Broad, miscellaneous facts for quiz-style learning.
+Examples:
+Question: "What color is the sky on a clear day?" Answer: "Blue"
+Question: "How many days are in a week?" Answer: "Seven"
+Question: "What’s the largest mammal?" Answer: "Whale"
+
+7. Sports Quick Quiz
+Purpose: Fast recall of sports-related terms or facts.
+Examples:
+Question: "What sport uses a racket?" Answer: "Tennis"
+Question: "How many players are on a soccer team?" Answer: "Eleven"
+Question: "What’s the term for a boxing victory?" Answer: "Knockout"
+
+8. Pop Culture
+Purpose: Quick facts from movies, music, or TV.
+Examples:
+Question: "Who sang 'Thriller'?" Answer: "Jackson"
+Question: "What’s Darth Vader’s son’s name?" Answer: "Luke"
+Question: "What show features a sponge?" Answer: "SpongeBob"
+
+9. Animal Kingdom
+Purpose: Learn animal names or characteristics.
+Examples:
+Question: "What’s the tallest animal?" Answer: "Giraffe"
+Question: "Which animal is known as man’s best friend?" Answer: "Dog"
+Question: "What bird can’t fly?" Answer: "Penguin"
+
+10. One-Word Riddles
+Purpose: Engage with simple, clever riddles.
+Examples:
+Question: "What has a neck but no head?" Answer: "Bottle"
+Question: "What’s black and white and read all over?" Answer: "Newspaper"
+Question: "What can fly without wings?" Answer: "Time"

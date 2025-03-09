@@ -13,7 +13,6 @@ using FlashcardApp.Models;
 using FlashcardApp.ViewModels.APIViewModels;
 using FlashcardApp.ViewModels;
 
-
 namespace FlashcardApp.Controllers
 {
     [Route("api/[controller]")]
@@ -27,8 +26,13 @@ namespace FlashcardApp.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly FlashCardService _flashCardService;
 
-        public AccountApiController(UserManager<ApplicationUser> userManager, ApplicationDbContext context,
-            IConfiguration configuration, SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager, FlashCardService flashCardService)
+        public AccountApiController(
+            UserManager<ApplicationUser> userManager,
+            ApplicationDbContext context,
+            IConfiguration configuration,
+            SignInManager<ApplicationUser> signInManager,
+            RoleManager<IdentityRole> roleManager,
+            FlashCardService flashCardService)
         {
             _userManager = userManager;
             _context = context;
@@ -120,10 +124,11 @@ namespace FlashcardApp.Controllers
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? ""));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
+            var user = _userManager.FindByEmailAsync(email).Result;
             var claims = new[]
             {
                 new Claim("Email", email ?? throw new ArgumentNullException(nameof(email))),
-                new Claim(ClaimTypes.NameIdentifier, (_userManager.FindByEmailAsync(email)?.Result)?.Id ?? throw new InvalidOperationException("User not found"))
+                new Claim(ClaimTypes.NameIdentifier, user?.Id ?? throw new InvalidOperationException("User not found"))
             };
 
             var token = new JwtSecurityToken(
@@ -172,7 +177,7 @@ namespace FlashcardApp.Controllers
                 LastName = user.LastName,
                 FlashCards = user.FlashCards.Select(f =>
                 {
-                    var category = _context.Categories.FirstOrDefault(c => c.Id == f.CategoryId && c.UserId == userId);
+                    var category = _context.Categories.FirstOrDefault(c => c.Id == f.CategoryId); // Removed UserId check
                     string categoryName = category != null ? category.Name : "Unknown";
                     return new FlashCardViewModel
                     {
@@ -241,8 +246,8 @@ namespace FlashcardApp.Controllers
             return BadRequest(result.Errors);
         }
 
-        [HttpGet("profile")]
         [Authorize]
+        [HttpGet("profile")]
         public async Task<IActionResult> GetProfile()
         {
             var userEmail = User.FindFirst("Email")?.Value;
@@ -263,6 +268,8 @@ namespace FlashcardApp.Controllers
 
             return Ok(profile);
         }
+
+        [Authorize]
         [HttpPost("users/{userId}/createFlashCard")]
         public async Task<IActionResult> CreateFlashCard(string userId, [FromBody] CreateFlashCardViewModel model)
         {
@@ -270,7 +277,7 @@ namespace FlashcardApp.Controllers
                 return BadRequest(ModelState);
 
             var category = await _context.Categories
-                .FirstOrDefaultAsync(c => c.Id == model.CategoryId && c.UserId == userId);
+                .FirstOrDefaultAsync(c => c.Id == model.CategoryId); // Removed UserId check
             if (category == null)
                 return BadRequest("Invalid category selected.");
 
@@ -295,6 +302,7 @@ namespace FlashcardApp.Controllers
             return CreatedAtAction(null, new { id = createdFlashCard.Id }, response);
         }
 
+        [Authorize]
         [HttpPut("users/{userId}/updateFlashCard/{id}")]
         public async Task<IActionResult> UpdateFlashCard(string userId, int id, [FromBody] UpdateFlashCardViewModel model)
         {
@@ -302,7 +310,7 @@ namespace FlashcardApp.Controllers
                 return BadRequest(ModelState);
 
             var category = await _context.Categories
-                .FirstOrDefaultAsync(c => c.Id == model.CategoryId && c.UserId == userId);
+                .FirstOrDefaultAsync(c => c.Id == model.CategoryId); // Removed UserId check
             if (category == null)
                 return BadRequest("Invalid category selected.");
 
@@ -321,6 +329,5 @@ namespace FlashcardApp.Controllers
 
             return NoContent();
         }
-            
     }
 }

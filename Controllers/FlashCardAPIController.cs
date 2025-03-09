@@ -1,13 +1,12 @@
 using FlashcardApp.Data;
 using FlashcardApp.Models;
 using FlashcardApp.ViewModels.APIViewModels;
-using FlashcardApp.ViewModels;
-using FlashcardApp.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
+using FlashcardApp.Services;
 
 namespace FlashcardApp.Controllers
 {
@@ -48,7 +47,7 @@ namespace FlashcardApp.Controllers
                 return NotFound();
 
             var category = await _context.Categories
-                .FirstOrDefaultAsync(c => c.Id == flashCard.CategoryId && c.UserId == userId);
+                .FirstOrDefaultAsync(c => c.Id == flashCard.CategoryId); // Removed UserId check
             var viewModel = new GetFlashCardViewModel
             {
                 Id = flashCard.Id,
@@ -71,7 +70,7 @@ namespace FlashcardApp.Controllers
                 return BadRequest(ModelState);
 
             var category = await _context.Categories
-                .FirstOrDefaultAsync(c => c.Id == model.CategoryId && c.UserId == userId);
+                .FirstOrDefaultAsync(c => c.Id == model.CategoryId); // Removed UserId check
             if (category == null)
                 return BadRequest("Invalid category selected.");
 
@@ -106,7 +105,7 @@ namespace FlashcardApp.Controllers
                 return BadRequest(ModelState);
 
             var category = await _context.Categories
-                .FirstOrDefaultAsync(c => c.Id == model.CategoryId && c.UserId == userId);
+                .FirstOrDefaultAsync(c => c.Id == model.CategoryId); // Removed UserId check
             if (category == null)
                 return BadRequest("Invalid category selected.");
 
@@ -160,7 +159,7 @@ namespace FlashcardApp.Controllers
             var random = new Random();
             var flashCard = filteredFlashCards[random.Next(filteredFlashCards.Count)];
             var category = await _context.Categories
-                .FirstOrDefaultAsync(c => c.Id == flashCard.CategoryId && c.UserId == userId);
+                .FirstOrDefaultAsync(c => c.Id == flashCard.CategoryId); // Removed UserId check
             var viewModel = new GetFlashCardViewModel
             {
                 Id = flashCard.Id,

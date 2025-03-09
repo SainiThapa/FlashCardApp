@@ -3,32 +3,40 @@
     var userId = ViewBag.UserId;
 }
 
-<h2>User Flashcards</h2>
+<h2 class="text-center mb-4">User Flashcards</h2>
 
 <form asp-action="DeleteSelectedFlashCards" method="post">
     <input type="hidden" name="userId" value="@userId" />
-    <table class="table">
-        <thead>
+    
+    <!-- Table with improved styling -->
+    <table class="table table-striped table-bordered table-hover">
+        <thead class="table-dark">
             <tr>
-                <th>Select</th>
-                <th>Category</th>
-                <th>Question</th>
-                <th>Answer</th>
+                <th class="text-center">Select</th>
+                <th class="text-center">Category</th>
+                <th class="text-center">Question</th>
+                <th class="text-center">Answer</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var flashCard in Model)
             {
                 <tr>
-                    <td><input type="checkbox" name="flashCardIds" value="@flashCard.Id" /></td>
-                    <td>@ViewBag.CategoryNames[flashCard.CategoryId]</td>
+                    <td class="text-center">
+                        <input type="checkbox" name="flashCardIds" value="@flashCard.Id" class="form-check-input" />
+                    </td>
+                    <td>@flashCard.Category.Name</td>
                     <td>@flashCard.Question</td>
                     <td>@flashCard.Answer</td>
                 </tr>
             }
         </tbody>
     </table>
-    <input type="hidden" name="userId" value="@ViewBag.UserId" />
-    <button type="submit" class="btn btn-danger">Delete Selected Flashcards</button>
-    <a href="@Url.Action("UserList", "Admin")" class="btn btn-secondary">Back to User List</a>
+
+    <!-- Buttons with larger styling -->
+    <div class="d-flex justify-content-between mt-4">
+        <button type="submit" class="btn btn-danger btn-lg w-48">Delete Selected Flashcards</button>
+        <a href="@Url.Action("UserList", "Admin")" class="btn btn-secondary btn-lg w-48 text-center">Back to User List</a>
+    </div>
 </form>
+

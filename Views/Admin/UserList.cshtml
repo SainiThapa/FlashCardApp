@@ -4,25 +4,29 @@
     <h2 class="text-center mb-4">User List</h2>
 
     <form asp-action="DeleteUsers" asp-controller="Admin" method="post">
-        <table class="table table-hover table-bordered">
+        <table class="table table-striped table-hover table-bordered shadow-sm rounded">
             <thead class="thead-dark">
                 <tr>
-                    <th scope="col"><input type="checkbox" onclick="checkAll(this)" /></th>
+                    <th scope="col" class="text-center">
+                        <input type="checkbox" onclick="checkAll(this)" />
+                    </th>
                     <th scope="col">Full Name</th>
                     <th scope="col">Email</th>
-                    <th scope="col">Actions</th>
+                    <th scope="col" class="text-center">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var user in Model)
                 {
                     <tr>
-                        <td><input type="checkbox" name="userIds" value="@user.Id" /></td>
+                        <td class="text-center">
+                            <input type="checkbox" name="userIds" value="@user.Id" />
+                        </td>
                         <td>@user.FirstName @user.LastName</td>
                         <td>@user.Email</td>
-                        <td>
+                        <td class="text-center">
                             <a href="@Url.Action("UserFlashCards", "Admin", new { userId = user.Id })"
-                                class="btn btn-primary btn-sm">
+                                class="btn btn-primary btn-lg">
                                 <i class="bi bi-list-check"></i> View Flashcards
                             </a>
                         </td>
@@ -31,20 +35,24 @@
             </tbody>
         </table>
 
-        <button type="submit" class="btn btn-danger btn-sm">
-            <i class="bi bi-trash"></i> Delete Selected Users
-        </button>
-        <a href="@Url.Action("AddUser", "Admin")" class="btn btn-info btn-sm">
-            <i class="bi bi-person-plus-fill"></i> Add New User
-        </a>
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <button type="submit" class="btn btn-danger btn-lg w-48">
+                <i class="bi bi-trash"></i> Delete Selected Users
+            </button>
+            <a href="@Url.Action("AddUser", "Admin")" class="btn btn-info btn-lg w-48">
+                <i class="bi bi-person-plus-fill"></i> Add New User
+            </a>
+        </div>
     </form>
-    <br>
-    <a href="@Url.Action("DownloadUserFlashCardsSummary", "Admin")" class="btn btn-success btn-sm">
-        <i class="bi bi-download"></i> Download User Report
-    </a>
-    <a href="@Url.Action("DownloadAllFlashCardsWithOwners", "Admin")" class="btn btn-warning btn-sm">
-        <i class="bi bi-download"></i> Download Flashcards Report
-    </a>
+
+    <div class="mt-4">
+        <a href="@Url.Action("DownloadUserFlashCardsSummary", "Admin")" class="btn btn-success btn-lg mr-2">
+            <i class="bi bi-download"></i> Download User Report
+        </a>
+        <a href="@Url.Action("DownloadAllFlashCardsWithOwners", "Admin")" class="btn btn-warning btn-lg">
+            <i class="bi bi-download"></i> Download Flashcards Report
+        </a>
+    </div>
 </div>
 
 <script>
@@ -58,13 +66,12 @@
 
 <style>
     .container {
-        max-width: 800px;
+        max-width: 900px;
     }
 
     .table {
         border-radius: 8px;
         overflow: hidden;
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     }
 
     .table thead {
@@ -75,17 +82,77 @@
     .table th,
     .table td {
         vertical-align: middle;
+        padding: 12px;
+    }
+
+    .table-striped tbody tr:nth-child(odd) {
+        background-color: #f9f9f9;
+    }
+
+    .thead-dark th {
+        background-color: #2d3338;
+        color: white;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    .btn {
+        font-size: 1.1rem;
+        padding: 10px 20px;
+        border-radius: 5px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
     }
 
     .btn-primary {
         background-color: #007bff;
         border-color: #007bff;
-        transition: background-color 0.3s ease, box-shadow 0.3s ease;
     }
 
     .btn-primary:hover {
         background-color: #0056b3;
-        box-shadow: 0px 4px 8px rgba(0, 123, 255, 0.4);
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+    }
+
+    .btn-info {
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+    }
+
+    .btn-info:hover {
+        background-color: #138496;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+    .btn-success:hover {
+        background-color: #218838;
+    }
+
+    .btn-warning {
+        background-color: #ffc107;
+        border-color: #ffc107;
+    }
+
+    .btn-warning:hover {
+        background-color: #e0a800;
     }
 
     .text-center {

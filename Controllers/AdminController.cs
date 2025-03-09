@@ -6,6 +6,10 @@ using System.Linq;
 using System.Globalization;
 using CsvHelper;
 using System.IO;
+using System.Threading.Tasks;
+using FlashcardApp.Models;
+using FlashcardApp.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace FlashcardApp.Controllers
 {
@@ -13,21 +17,26 @@ namespace FlashcardApp.Controllers
     public class AdminController : Controller
     {
         private readonly AdminService _adminService;
-        private readonly FlashCardService _flashCardService; 
+        private readonly FlashCardService _flashCardService;
         private readonly ILogger<AdminController> _logger;
         private readonly AccountService _accountService;
+        private readonly ApplicationDbContext _context;
 
-        public AdminController(AdminService adminService, FlashCardService flashCardService, AccountService accountService, ILogger<AdminController> logger)
+
+        public AdminController(AdminService adminService,
+            ApplicationDbContext context,
+         FlashCardService flashCardService, AccountService accountService, ILogger<AdminController> logger)
         {
             _adminService = adminService;
             _flashCardService = flashCardService;
             _accountService = accountService;
             _logger = logger;
+            _context = context;
         }
 
         public IActionResult Index()
         {
-            return View(); // Updated to use Admin Dashboard view
+            return View();
         }
 
         public async Task<IActionResult> UserList()
@@ -46,7 +55,7 @@ namespace FlashcardApp.Controllers
                 return NotFound("No flashcards found for this user.");
 
             ViewBag.UserId = userId;
-            ViewBag.CategoryNames = await _flashCardService.GetCategoriesAsync(userId); 
+            ViewBag.CategoryNames = await _adminService.GetAllCategoriesAsync();             
             return View(flashCards);
         }
 
@@ -59,6 +68,130 @@ namespace FlashcardApp.Controllers
                 return RedirectToAction("UserFlashCards", new { userId });
             }
             return RedirectToAction("UserFlashCards", new { userId });
+        }
+
+        // Category Management Actions
+        [HttpGet]
+        public async Task<IActionResult> Categories()
+        {
+            var categories = await _adminService.GetAllCategoriesAsync();
+            var viewModel = new CategoryManagementViewModel
+            {
+                Categories = categories.Select(c => new CategoryViewModel
+                {
+                    Id = c.Id,
+                    Name = c.Name
+                }).ToList()
+            };
+            return View(viewModel);
+        }
+
+        [Authorize]
+        [HttpGet("categories")]
+        public async Task<IActionResult> GetCategories()
+        {
+            var categories = await _context.Categories
+                .Select(c => new { c.Id, c.Name })
+                .ToListAsync();
+            return Ok(categories);
+        }
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddCategory(CategoryManagementViewModel model)
+        {
+            _logger.LogInformation($"Incoming Category Name: '{model.NewCategory.Name}'");
+            if (!ModelState.IsValid)
+            {
+            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+            _logger.LogWarning("ModelState invalid: {0}", string.Join(", ", errors));
+            var categories = await _adminService.GetAllCategoriesAsync();
+            model.Categories = categories.Select(c => new CategoryViewModel
+            {
+                Id = c.Id,
+                Name = c.Name}).ToList();
+                return View("Categories", model);
+               }
+            try
+            {
+                var category = new Category
+                {
+                    Name = model.NewCategory.Name
+                };
+                await _adminService.AddCategoryAsync(category);
+                TempData["SuccessMessage"] = "Category added successfully!";
+            }
+            catch (Exception error)
+            {
+                _logger.LogError(error, "Failed to add category");
+                TempData["ErrorMessage"] = $"Failed to add category: {error.Message}";
+            }
+            return RedirectToAction("Categories");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditCategory(int id)
+        {
+            var category = await _adminService.GetCategoryByIdAsync(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            var model = new CategoryViewModel
+            {
+                Id = category.Id,
+                Name = category.Name
+            };
+            return View(model);
+        }
+
+        // New EditCategory POST action
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditCategory(CategoryViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var category = await _adminService.GetCategoryByIdAsync(model.Id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            category.Name = model.Name;
+            await _adminService.UpdateCategoryAsync(category);
+            return RedirectToAction("Categories");
+        }
+
+        // New DeleteCategory GET action (for confirmation)
+        [HttpGet]
+        public async Task<IActionResult> DeleteCategory(int id)
+        {
+            var category = await _adminService.GetCategoryByIdAsync(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            var model = new CategoryViewModel
+            {
+                Id = category.Id,
+                Name = category.Name
+            };
+            return View(model);
+        }
+
+        // New DeleteCategory POST action
+        [HttpPost, ActionName("DeleteCategory")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteCategoryConfirmed(int id)
+        {
+            await _adminService.DeleteCategoryAsync(id);
+            return RedirectToAction("Categories");
         }
 
         public IActionResult ResetPassword(string token, string email)
