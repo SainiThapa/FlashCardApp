@@ -59,6 +59,24 @@ namespace FlashcardApp.Services
             return true;
         }
 
+        public async Task<bool> BulkDeleteFlashCardsAsync(List<int> flashcardIds, string userId)
+        {
+            if (flashcardIds == null || !flashcardIds.Any())
+                return false;
+
+            var flashcardsToDelete = await _context.FlashCards
+                .Where(f => flashcardIds.Contains(f.Id) && f.UserId == userId)
+                .ToListAsync();
+
+            if (!flashcardsToDelete.Any())
+                return false;
+
+            _context.FlashCards.RemoveRange(flashcardsToDelete);
+            await _context.SaveChangesAsync();
+            return true; 
+        }
+
+
         public async Task<FlashCard> GetFlashCardByIdAsync(int id)
         {
             return await _context.FlashCards.FindAsync(id); // Removed exception, returning null if not found
@@ -88,23 +106,5 @@ namespace FlashcardApp.Services
                 Answer = flashCard.Answer
             };
         }
-
-        // public async Task<Dictionary<int, string>> GetCategoriesAsync()         
-        // {
-        //     return await _context.Categories
-        //         .ToDictionaryAsync(c => c.Id, c => c.Name) ?? new Dictionary<int, string>();
-        // }
-
-        // public async Task<List<Category>> GetAllCategoriesAsync()
-        // {
-        //     return await _context.Categories
-        //         .ToListAsync(); 
-        // }
-
-        // public async Task AddCategoryAsync(Category category)
-        // {
-        //     _context.Categories.Add(category);
-        //     await _context.SaveChangesAsync();
-        // }
     }
 }

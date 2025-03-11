@@ -101,27 +101,6 @@ namespace FlashcardApp.Controllers
             }
             return Unauthorized();
         }
-
-        [HttpPost("admin/login")]
-        public async Task<IActionResult> AdminLogin([FromBody] UserLoginDto userLogin)
-        {
-            var validation = await IsValidUser(userLogin);
-            if (validation)
-            {
-                var user = await _userManager.FindByEmailAsync(userLogin.Email);
-                if (user == null || !await _userManager.IsInRoleAsync(user, "Admin"))
-                    return Unauthorized("Access denied. Admins only.");
-
-                var token = GenerateJwtToken(userLogin.Email);
-                if (Request.Headers["X-Source"].FirstOrDefault() == "MobileApp")
-                {
-                    Console.WriteLine($"Admin Login successful: User {userLogin.Email} logged in from MobileApp at {DateTime.Now}");
-                }
-                return Ok(new { Token = token });
-            }
-            return Unauthorized("Invalid login credentials.");
-        }
-
         private async Task<bool> IsValidUser(UserLoginDto userLogin)
         {
             var result = await _signInManager.PasswordSignInAsync(
@@ -153,11 +132,15 @@ namespace FlashcardApp.Controllers
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        // [Authorize]
-        [HttpGet("users")]
-        public async Task<ActionResult<IEnumerable<ApplicationUser>>> GetAllUsers()
+        [HttpGet("userId")]
+        public IActionResult GetUserId()
         {
-            return await _userManager.Users.ToListAsync();
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User ID not found.");
+            }
+            return Ok(userId);
         }
 
         [Authorize]
@@ -276,10 +259,35 @@ namespace FlashcardApp.Controllers
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email,
-                TaskCount = flashCardCount
             };
 
             return Ok(profile);
+        }
+        
+        [Authorize]
+        [HttpPut("updateProfile")]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var userEmail = User.FindFirst("Email")?.Value;
+            var user = await _userManager.FindByEmailAsync(userEmail ?? throw new InvalidOperationException("Email claim not found"));
+
+            if (user == null)
+                return NotFound("User not found");
+
+            user.UserName = model.Username;
+            user.Email = model.Email;
+
+            var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
+                return Ok(new { message = "Profile updated successfully" });
+
+            foreach (var error in result.Errors)
+                ModelState.AddModelError("", error.Description);
+
+            return BadRequest(ModelState);
         }
 
         [Authorize]

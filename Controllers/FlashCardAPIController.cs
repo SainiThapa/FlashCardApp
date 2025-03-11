@@ -27,12 +27,27 @@ namespace FlashcardApp.Controllers
         [HttpGet("List")]
         public async Task<ActionResult<IEnumerable<FlashCard>>> GetFlashCards()
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("User ID not found in the token.");
+        Console.WriteLine("API CALLED FOR LIST OF FLASHCARDS");
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized("User ID not found in the token.");
 
-            var flashCards = await _flashCardService.GetUserFlashCardsAsync(userId);
-            return Ok(flashCards);
+        var flashCards = _context.FlashCards.Where(f=>f.UserId==userId).ToList();
+        var flashCardViewModels = flashCards.Select(flashCard =>
+        {
+            var category = _context.Categories.FirstOrDefault(c => c.Id == flashCard.CategoryId);
+            return new GetFlashCardViewModel
+            {
+                Id = flashCard.Id,
+                CategoryName = category?.Name ?? "Unknown",
+                Question = flashCard.Question,
+                Answer = flashCard.Answer,
+                UserId = flashCard.UserId
+            };
+        }).ToList();
+        Console.WriteLine("RETURNING FLASHCARDS LIST");
+
+        return Ok(flashCardViewModels);
         }
 
         [HttpGet("{id}")]
@@ -94,7 +109,7 @@ namespace FlashcardApp.Controllers
             return CreatedAtAction(nameof(GetFlashCard), new { id = createdFlashCard.Id }, response);
         }
 
-        [HttpPut("edit/{id}")]
+        [HttpPut("update/{id}")]
         public async Task<IActionResult> UpdateFlashCard(int id, UpdateFlashCardViewModel model)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -139,6 +154,41 @@ namespace FlashcardApp.Controllers
             return NoContent();
         }
 
+        [HttpPost("bulk-delete")]
+        public async Task<IActionResult> BulkDeleteFlashCards([FromBody] List<int> flashcardIds)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                {
+                Console.WriteLine("BulkDeleteFlashCards: Unauthorized request.");
+                return Unauthorized("User ID not found in the token.");
+                }   
+
+            if (flashcardIds == null || !flashcardIds.Any())
+                {
+                    Console.WriteLine("BulkDeleteFlashCards: No flashcard IDs received.");
+                    return BadRequest("No flashcard IDs provided for deletion.");
+                }
+            Console.WriteLine("BulkDeleteFlashCards: Received IDs - " + string.Join(", ", flashcardIds));
+
+            var deleted = await _flashCardService.BulkDeleteFlashCardsAsync(flashcardIds, userId);
+            if (!deleted)
+            {
+                Console.WriteLine("BulkDeleteFlashCards: Failed to delete flashcards.");
+                return NotFound("Failed to delete some or all flashcards.");
+            }
+
+            return NoContent();
+        }
+
+        
+        [HttpGet("categories")]
+        public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
+        {
+            var categories = await _context.Categories.ToListAsync();
+            return Ok(categories);
+        }
+
         [HttpGet("quiz/random")]
         public async Task<ActionResult<GetFlashCardViewModel>> GetRandomFlashCard([FromQuery] int? CategoryId)
         {
@@ -172,31 +222,31 @@ namespace FlashcardApp.Controllers
             return Ok(viewModel);
         }
 
-        [HttpGet("All")]
-        public async Task<ActionResult<IEnumerable<GetFlashCardViewModel>>> GetAllFlashCards()
-        {
-            // Retrieve all flashcards without user filtering
-            var allFlashCards = await _context.FlashCards
-                .Include(f => f.Category)
-                .ToListAsync();
+        // [HttpGet("All")]
+        // public async Task<ActionResult<IEnumerable<GetFlashCardViewModel>>> GetAllFlashCards()
+        // {
+        //     // Retrieve all flashcards without user filtering
+        //     var allFlashCards = await _context.FlashCards
+        //         .Include(f => f.Category)
+        //         .ToListAsync();
 
-            if (allFlashCards == null || !allFlashCards.Any())
-                return NotFound("No flashcards found in the database.");
+        //     if (allFlashCards == null || !allFlashCards.Any())
+        //         return NotFound("No flashcards found in the database.");
 
-            var flashCardViewModels = allFlashCards.Select(flashCard => new GetFlashCardViewModel
-            {
-                Id = flashCard.Id,
-                CategoryName = flashCard.Category?.Name ?? "Unknown",
-                Question = flashCard.Question,
-                Answer = flashCard.Answer,
-                UserId = flashCard.UserId
-            }).ToList();
+        //     var flashCardViewModels = allFlashCards.Select(flashCard => new GetFlashCardViewModel
+        //     {
+        //         Id = flashCard.Id,
+        //         CategoryName = flashCard.Category?.Name ?? "Unknown",
+        //         Question = flashCard.Question,
+        //         Answer = flashCard.Answer,
+        //         UserId = flashCard.UserId
+        //     }).ToList();
 
-            return Ok(new
-            {
-                TotalCount = flashCardViewModels.Count,
-                Flashcards = flashCardViewModels
-            });
-        }
+        //     return Ok(new
+        //     {
+        //         TotalCount = flashCardViewModels.Count,
+        //         Flashcards = flashCardViewModels
+        //     });
+        // }
     }
 }
