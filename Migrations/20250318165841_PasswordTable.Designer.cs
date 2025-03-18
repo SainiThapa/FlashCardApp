@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FLASHCARDAPP.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250309061344_CategoryUpdate")]
-    partial class CategoryUpdate
+    [Migration("20250318165841_PasswordTable")]
+    partial class PasswordTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -69,6 +69,10 @@ namespace FLASHCARDAPP.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("PlainTextPassword")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("TEXT");

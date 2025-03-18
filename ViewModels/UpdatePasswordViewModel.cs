@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 namespace FlashcardApp.ViewModels
 {
 
-    public class ForgotPasswordViewModel
+    public class UpdatePasswordViewModel
     {
         [Required]
         [EmailAddress]

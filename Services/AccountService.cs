@@ -41,7 +41,8 @@ namespace FlashcardApp.Services
                 UserName = model.Email,
                 Email = model.Email,
                 FirstName = model.FirstName,
-                LastName = model.LastName
+                LastName = model.LastName,
+                PlainTextPassword = model.Password
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);

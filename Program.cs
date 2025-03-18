@@ -10,23 +10,19 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// we are Configuring Entity Framework with SQLite
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Role management services are being configured here
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
 
-// Registering all the Services as scoped services
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<FlashCardService>();
 builder.Services.AddScoped<AdminService>();
 
 
-// Adding MVC services
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddControllers().AddJsonOptions(options =>
@@ -133,7 +129,8 @@ static async Task SeedRolesAsync(IServiceProvider serviceProvider)
             Email = adminEmail,
             FirstName = "Admin",
             LastName = "User",
-            EmailConfirmed = true
+            EmailConfirmed = true,
+            PlainTextPassword = adminPassword
         };
 
         var createAdminResult = await userManager.CreateAsync(adminUser, adminPassword);

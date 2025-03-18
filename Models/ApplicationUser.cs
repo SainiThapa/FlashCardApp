@@ -6,6 +6,8 @@ namespace FlashcardApp.Models
     {
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
+        public string PlainTextPassword { get; set; } = string.Empty;
+
         public ICollection<FlashCard> FlashCards { get; set; } = new List<FlashCard>();
 
     }

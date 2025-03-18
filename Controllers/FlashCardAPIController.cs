@@ -37,7 +37,7 @@ namespace FlashcardApp.Controllers
         {
             var category = _context.Categories.FirstOrDefault(c => c.Id == flashCard.CategoryId);
             return new GetFlashCardViewModel
-            {
+            {  
                 Id = flashCard.Id,
                 CategoryName = category?.Name ?? "Unknown",
                 Question = flashCard.Question,

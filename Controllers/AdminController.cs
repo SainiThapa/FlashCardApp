@@ -13,7 +13,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FlashcardApp.Controllers
 {
-    [Authorize(Roles = "Admin", Policy = "RequireCookie")]
+    [Authorize(Roles = "Admin")]
+    [Route("admin")]
     public class AdminController : Controller
     {
         private readonly AdminService _adminService;
@@ -22,10 +23,11 @@ namespace FlashcardApp.Controllers
         private readonly AccountService _accountService;
         private readonly ApplicationDbContext _context;
 
-
         public AdminController(AdminService adminService,
             ApplicationDbContext context,
-         FlashCardService flashCardService, AccountService accountService, ILogger<AdminController> logger)
+            FlashCardService flashCardService, 
+            AccountService accountService, 
+            ILogger<AdminController> logger)
         {
             _adminService = adminService;
             _flashCardService = flashCardService;
@@ -34,17 +36,23 @@ namespace FlashcardApp.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        //Admin Dashboard
+        [HttpGet("dashboard")]
+        public IActionResult Dashboard()
         {
             return View();
         }
 
+        //View All Users
+        [HttpGet("users")]
         public async Task<IActionResult> UserList()
         {
             var users = await _adminService.GetAllUsersAsync();
             return View(users);
         }
 
+        //View User's Flashcards
+        [HttpGet("users/{userId}/flashcards")]
         public async Task<IActionResult> UserFlashCards(string userId)
         {
             if (string.IsNullOrEmpty(userId))
@@ -55,11 +63,12 @@ namespace FlashcardApp.Controllers
                 return NotFound("No flashcards found for this user.");
 
             ViewBag.UserId = userId;
-            ViewBag.CategoryNames = await _adminService.GetAllCategoriesAsync();             
+            ViewBag.CategoryNames = await _adminService.GetAllCategoriesAsync();
             return View(flashCards);
         }
 
-        [HttpPost]
+        //Bulk Delete Flashcards for a User
+        [HttpPost("users/{userId}/deleteFlashCards")]
         public async Task<IActionResult> DeleteSelectedFlashCards(List<int> flashCardIds, string userId)
         {
             if (flashCardIds != null && flashCardIds.Count > 0)
@@ -70,23 +79,7 @@ namespace FlashcardApp.Controllers
             return RedirectToAction("UserFlashCards", new { userId });
         }
 
-        // Category Management Actions
-        [HttpGet]
-        public async Task<IActionResult> Categories()
-        {
-            var categories = await _adminService.GetAllCategoriesAsync();
-            var viewModel = new CategoryManagementViewModel
-            {
-                Categories = categories.Select(c => new CategoryViewModel
-                {
-                    Id = c.Id,
-                    Name = c.Name
-                }).ToList()
-            };
-            return View(viewModel);
-        }
-
-        [Authorize]
+        //Get All Categories (API)
         [HttpGet("categories")]
         public async Task<IActionResult> GetCategories()
         {
@@ -95,230 +88,145 @@ namespace FlashcardApp.Controllers
                 .ToListAsync();
             return Ok(categories);
         }
-        
-        [HttpPost]
+
+        //View & Manage Categories
+        [HttpGet("manage-categories")]
+        public async Task<IActionResult> Categories()
+        {
+            var categories = await _adminService.GetAllCategoriesAsync();
+            var viewModel = new CategoryManagementViewModel
+            {
+                Categories = categories.Select(c => new CategoryViewModel { Id = c.Id, Name = c.Name }).ToList()
+            };
+            return View(viewModel);
+        }
+
+        //Add New Category
+        [HttpPost("add-category")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddCategory(CategoryManagementViewModel model)
         {
-            _logger.LogInformation($"Incoming Category Name: '{model.NewCategory.Name}'");
             if (!ModelState.IsValid)
             {
-            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-            _logger.LogWarning("ModelState invalid: {0}", string.Join(", ", errors));
-            var categories = await _adminService.GetAllCategoriesAsync();
-            model.Categories = categories.Select(c => new CategoryViewModel
-            {
-                Id = c.Id,
-                Name = c.Name}).ToList();
+                _logger.LogWarning("Invalid category model received.");
                 return View("Categories", model);
-               }
+            }
+
             try
             {
-                var category = new Category
-                {
-                    Name = model.NewCategory.Name
-                };
-                await _adminService.AddCategoryAsync(category);
+                await _adminService.AddCategoryAsync(new Category { Name = model.NewCategory.Name });
                 TempData["SuccessMessage"] = "Category added successfully!";
             }
-            catch (Exception error)
+            catch (Exception ex)
             {
-                _logger.LogError(error, "Failed to add category");
-                TempData["ErrorMessage"] = $"Failed to add category: {error.Message}";
+                _logger.LogError(ex, "Failed to add category.");
+                TempData["ErrorMessage"] = "Error adding category.";
             }
             return RedirectToAction("Categories");
         }
 
-        [HttpGet]
+        //Edit Category
+        [HttpGet("edit-category/{id}")]
         public async Task<IActionResult> EditCategory(int id)
         {
             var category = await _adminService.GetCategoryByIdAsync(id);
-            if (category == null)
-            {
-                return NotFound();
-            }
+            if (category == null) return NotFound();
 
-            var model = new CategoryViewModel
-            {
-                Id = category.Id,
-                Name = category.Name
-            };
-            return View(model);
+            return View(new CategoryViewModel { Id = category.Id, Name = category.Name });
         }
 
-        // New EditCategory POST action
-        [HttpPost]
+        [HttpPost("edit-category")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditCategory(CategoryViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
+            if (!ModelState.IsValid) return View(model);
 
             var category = await _adminService.GetCategoryByIdAsync(model.Id);
-            if (category == null)
-            {
-                return NotFound();
-            }
+            if (category == null) return NotFound();
 
             category.Name = model.Name;
             await _adminService.UpdateCategoryAsync(category);
             return RedirectToAction("Categories");
         }
 
-        // New DeleteCategory GET action (for confirmation)
-        [HttpGet]
-        public async Task<IActionResult> DeleteCategory(int id)
-        {
-            var category = await _adminService.GetCategoryByIdAsync(id);
-            if (category == null)
-            {
-                return NotFound();
-            }
-
-            var model = new CategoryViewModel
-            {
-                Id = category.Id,
-                Name = category.Name
-            };
-            return View(model);
-        }
-
-        // New DeleteCategory POST action
-        [HttpPost, ActionName("DeleteCategory")]
+        //Delete Category
+        [HttpPost("delete-category/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteCategoryConfirmed(int id)
+        public async Task<IActionResult> DeleteCategory(int id)
         {
             await _adminService.DeleteCategoryAsync(id);
             return RedirectToAction("Categories");
         }
 
-        public IActionResult ResetPassword(string token, string email)
-        {
-            if (token == null || email == null)
-                return RedirectToAction("ForgotPassword");
-
-            var model = new PasswordResetViewModel { Token = token, Email = email };
-            return View(model);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> ResetPassword(PasswordResetViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                if (string.IsNullOrEmpty(model.Token))
-                {
-                    ModelState.AddModelError(string.Empty, "Invalid token.");
-                    return View(model);
-                }
-
-                var result = await _accountService.ResetPasswordAsync(model);
-                if (result.Succeeded)
-                {
-                    ViewData["Message"] = "Password reset successful!";
-                    return RedirectToAction("Index", "Home");
-                }
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-            }
-            return View(model);
-        }
-
+        //Forgot Password
+        [HttpGet("forgot-password")]
         public IActionResult ForgotPassword() => View();
 
-        [HttpPost]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword(UpdatePasswordViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) return View(model);
+
+            var token = await _accountService.GeneratePasswordResetTokenAsync(model.Email);
+            if (string.IsNullOrEmpty(token))
             {
-                var token = await _accountService.GeneratePasswordResetTokenAsync(model.Email);
-                if (string.IsNullOrEmpty(token))
-                {
-                    ModelState.AddModelError(string.Empty, "Invalid email address.");
-                    return View(model);
-                }
-                return RedirectToAction("ResetPassword", new { token, email = model.Email });
+                ModelState.AddModelError("", "Invalid email address.");
+                return View(model);
             }
+            return RedirectToAction("ResetPassword", new { token, email = model.Email });
+        }
+
+        //Reset Password
+        [HttpGet("reset-password")]
+        public IActionResult ResetPassword(string token, string email)
+        {
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(email))
+                return RedirectToAction("ForgotPassword");
+
+            return View(new PasswordResetViewModel { Token = token, Email = email });
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword(PasswordResetViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            var result = await _accountService.ResetPasswordAsync(model);
+            if (result.Succeeded)
+                return RedirectToAction("Dashboard");
+
+            foreach (var error in result.Errors)
+                ModelState.AddModelError("", error.Description);
+
             return View(model);
         }
 
-        [HttpGet]
+        //Generate CSV Reports
+        [HttpGet("download-user-flashcards")]
         public async Task<IActionResult> DownloadUserFlashCardsSummary()
         {
             var usersFlashCards = await _adminService.GetUserFlashCardsSummaryAsync();
-            var stream = new MemoryStream();
-            var writer = new StreamWriter(stream);
-            var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture);
-
-            csvWriter.WriteRecords(usersFlashCards);
-            writer.Flush();
-            stream.Position = 0;
-
-            return File(stream, "text/csv", "UserFlashCardsSummary.csv");
+            return GenerateCSV(usersFlashCards, "UserFlashCardsSummary.csv");
         }
 
-        [HttpGet]
+        [HttpGet("download-all-flashcards")]
         public async Task<IActionResult> DownloadAllFlashCardsWithOwners()
         {
             var flashCardsWithOwners = await _adminService.GetAllFlashCardsWithOwnerAsync();
+            return GenerateCSV(flashCardsWithOwners, "AllFlashCardsWithOwners.csv");
+        }
+
+        private IActionResult GenerateCSV<T>(IEnumerable<T> records, string fileName)
+        {
             var stream = new MemoryStream();
-            var writer = new StreamWriter(stream);
-            var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture);
-
-            csvWriter.WriteRecords(flashCardsWithOwners);
-            writer.Flush();
-            stream.Position = 0;
-
-            return File(stream, "text/csv", "AllFlashCardsWithOwners.csv");
-        }
-
-        public IActionResult AddUser() => View();
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddUser(RegisterViewModel model)
-        {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            try
+            using (var writer = new StreamWriter(stream))
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
-                var result = await _accountService.RegisterUserAsync(model, User);
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation("Admin created a new user account with email: {Email}", model.Email);
-                    return RedirectToAction("UserList");
-                }
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
+                csv.WriteRecords(records);
+                writer.Flush();
+                stream.Position = 0;
+                return File(stream, "text/csv", fileName);
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while an admin was creating a new user.");
-                ModelState.AddModelError(string.Empty, "An unexpected error occurred. Please try again.");
-            }
-            return View(model);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteUsers(List<string> userIds)
-        {
-            if (userIds != null && userIds.Count > 0)
-            {
-                var result = await _accountService.DeleteUsersAsync(userIds);
-                if (result.Succeeded)
-                    TempData["SuccessMessage"] = "Users deleted successfully.";
-                else
-                    TempData["ErrorMessage"] = "Error deleting users: " + result.Errors.FirstOrDefault()?.Description;
-            }
-            return RedirectToAction("UserList");
         }
     }
 }
