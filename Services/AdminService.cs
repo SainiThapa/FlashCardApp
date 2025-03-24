@@ -146,5 +146,34 @@ namespace FlashcardApp.Services
         {
             return await _context.Categories.FindAsync(id);
         }
+        public async Task<bool> DeleteUsersAsync(List<string> userIds)
+        {
+            if (userIds == null || !userIds.Any())
+            {
+                return false;
+            }
+
+            var usersToDelete = await _context.Users
+                .Where(user => userIds.Contains(user.Id))
+                .ToListAsync();
+
+            if (!usersToDelete.Any())
+            {
+                return false;
+            }
+
+            _context.Users.RemoveRange(usersToDelete);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting users: {ex.Message}");
+                return false;
+            }
+        }
     }
 }

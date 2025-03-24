@@ -89,7 +89,10 @@ namespace FlashcardApp.Controllers
 
             Console.WriteLine("User authentication successful");
             var token = GenerateJwtToken(userLogin.Email);
-            return Ok(new { Token = token });
+
+            var response = new {Token = token};
+            Console.WriteLine(token);
+            return Ok(response);
         }
 
         // ADMIN LOGIN
@@ -99,15 +102,42 @@ namespace FlashcardApp.Controllers
             Console.WriteLine($"Admin Login Attempt: {userLogin.Email}");
 
             var user = await _userManager.FindByEmailAsync(userLogin.Email);
+            Console.WriteLine($"User found: {user}");
+            
             if (user == null)
+               { Console.WriteLine("User not found");
                 return Unauthorized("Invalid credentials.");
-
+}
             var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
             if (!isAdmin)
+             {   Console.WriteLine("User is not an admin");
                 return Unauthorized("Access denied. Admins only.");
-
+             }
+            Console.WriteLine("Admin authentication successful");   
             var token = GenerateJwtToken(userLogin.Email);
-            return Ok(new { Token = token });
+            var response = new {Token = token};
+            Console.WriteLine(token);
+
+            return Ok(response);
+        }
+
+        [HttpGet("is-admin")]
+        [Authorize]
+        public async Task<IActionResult> IsAdmin()
+        {
+            var userEmail = User.FindFirst("Email")?.Value;
+
+            if (string.IsNullOrEmpty(userEmail))
+                return Unauthorized(new { message = "User not authenticated" });
+
+            var user = await _userManager.FindByEmailAsync(userEmail);
+            if (user == null)
+                return NotFound(new { message = "User not found" });
+
+            // Check if the user is in the Admin role
+            var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+
+            return Ok(new { isAdmin });
         }
 
         // FORGOT PASSWORD
@@ -140,6 +170,8 @@ namespace FlashcardApp.Controllers
         [HttpPut("user/{email}/updatePassword")]
         public async Task<IActionResult> UpdateUserPassword(string email, [FromBody] UpdateUserViewModel model)
         {
+            Console.WriteLine("Updating password for: " + email);
+
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null) return NotFound("User not found.");
 
@@ -165,9 +197,27 @@ namespace FlashcardApp.Controllers
             var userEmail = User.FindFirst("Email")?.Value;
             var user = await _userManager.FindByEmailAsync(userEmail);
             if (user == null) return NotFound("User not found.");
-
             return Ok(new { user.FirstName, user.LastName, user.Email });
         }
+        // ➤ Update user profile
+        [HttpPut("users/update")]
+        public async Task<IActionResult> UpdateUser([FromBody] UpdateProfileViewModel model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+                return NotFound("User not found.");
+
+            user.UserName=model.Username;
+            user.Email = model.Email;
+
+            var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
+                return Ok(new { message = "User updated successfully." });
+
+            return BadRequest(result.Errors);
+        }
+
+
 
         // DELETE USER
         [Authorize]
@@ -196,6 +246,8 @@ namespace FlashcardApp.Controllers
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var user = _userManager.FindByEmailAsync(email).Result;
+            
+            // var roles = _userManager.GetRolesAsync(user);
             var claims = new[]
             {
                 new Claim("Email", email),

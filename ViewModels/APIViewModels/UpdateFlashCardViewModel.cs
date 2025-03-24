@@ -1,10 +1,17 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace FlashcardApp.ViewModels.APIViewModels
 {
     public class CreateFlashCardViewModel
     {
-        public int CategoryId { get; set; } 
+        [Required]
         public string Question { get; set; }
+
+        [Required]
         public string Answer { get; set; }
+
+        [Required]
+        public int CategoryId { get; set; }
     }
 
     public class UpdateFlashCardViewModel
