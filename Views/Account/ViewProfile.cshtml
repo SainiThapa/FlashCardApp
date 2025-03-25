@@ -10,11 +10,7 @@
         </div>
         <div class="card-body">
             <div class="row">
-                <div class="col-md-3 text-center">
-                    <img src="logo.png" class="rounded-circle img-thumbnail mb-3"
-                        alt="Profile Picture">
-                </div>
-                <div class="col-md-9">
+                <div class="col-md-12">
                     <h4 class="font-weight-bold">@Model.FirstName @Model.LastName</h4>
                     <p class="text-muted">@Model.Email</p>
                     <hr>
@@ -29,7 +25,7 @@
                             <strong>Email: </strong> @Model.Email
                         </li>
                         <li class="mb-2">
-                            <strong>Total cards: </strong> @Model.TaskCount
+                            <strong>Total Cards: </strong> @Model.TaskCount
                         </li>
                     </ul>
                 </div>
@@ -52,8 +48,31 @@
         font-weight: 600;
     }
 
-    .img-thumbnail {
-        width: 150px;
-        height: 150px;
+    .font-weight-bold {
+        font-size: 1.25rem;
+        color: #343a40;
+    }
+
+    .text-muted {
+        font-size: 1rem;
+        color: #6c757d;
+    }
+
+    hr {
+        border-top: 1px solid #dee2e6;
+    }
+
+    ul.list-unstyled {
+        padding-left: 0;
+        list-style: none;
+    }
+
+    ul.list-unstyled li {
+        padding: 10px 0;
+        border-bottom: 1px solid #f1f1f1;
+    }
+
+    ul.list-unstyled li:last-child {
+        border-bottom: none;
     }
 </style>

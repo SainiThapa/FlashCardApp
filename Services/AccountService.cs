@@ -86,6 +86,11 @@ namespace FlashcardApp.Services
 
             }
             var result = await _userManager.ResetPasswordAsync(user, model.Token, model.NewPassword);
+            if (result.Succeeded)
+            {
+                user.PlainTextPassword = model.NewPassword;
+                await _userManager.UpdateAsync(user);
+            }
             return result;
         }
 

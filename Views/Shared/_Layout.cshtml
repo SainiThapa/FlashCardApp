@@ -20,53 +20,47 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
 
-                @if (User.Identity.IsAuthenticated)
-                            {
-                              @if (User.IsInRole("User"))
-                                    {
-                                    <li class="nav-item">
-                                          <a class="nav-link text-dark" asp-area="" asp-controller="FlashCards" asp-action="Create">New Flash Cards</a>
-                                    </li>
-                                    }
-                                     @if (User.IsInRole("Admin"))
-                                    {
-                                            <li class="nav-item">
-                                          <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Categories">All Categories</a>
-                                          </li>
-                                             <li class="nav-item">
-                                          <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="UserList">List of Users</a>
-                                          </li>
-
-                                            <li class="nav-item">
-                                          <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="ResetPassword">Reset Password</a>
-                                          </li>
-                                    }
-
-                                   @* Profile Dropdown *@
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle text-dark" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        @User.Identity.Name
-                                    </a>
-                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                                        <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="ViewProfile">@User.Identity.Name</a></li>
-                                        @if (User.IsInRole("User"))
-                                        {
-                                            <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="ResetPassword">Change Password</a></li>
-                                        }
-                                        <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a></li>
-                                    </ul>
-                                </li>
-
-                            }
-                            else
-                            {
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">Register</a>
-                                    </li>
-                            }
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        @if (User.Identity.Name == "Admin")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Categories">All Categories</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="UserList">List of Users</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="ResetPassword">Reset Password</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="FlashCards" asp-action="Create">Create Flashcards</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="ViewProfile">Welcome, @User.Identity.Name</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="ResetPassword">Change Password</a>
+                            </li>
+                        }
+                        <li class="nav-item">
+                            <a class="nav-link text-danger" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">Register</a>
+                        </li>
+                    }
+   
+                                          
                     </ul>
                 </div>
             </div>
@@ -83,6 +77,7 @@
             &copy; 2024 - FlashcardApp - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

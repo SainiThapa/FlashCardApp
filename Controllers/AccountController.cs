@@ -95,7 +95,20 @@ namespace FlashcardApp.Controllers
         [Authorize(Policy = "RequireCookie")]
         public async Task<IActionResult> Logout()
         {
-            await _accountService.LogoutUserAsync();
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            // Clear all cookies
+            if (HttpContext.Request.Cookies != null)
+            {
+                foreach (var cookie in HttpContext.Request.Cookies.Keys)
+                {
+                    Response.Cookies.Delete(cookie);
+                }
+            }
+
+            // Log the event
+            _logger.LogInformation("User logged out successfully.");
+
             return RedirectToAction("Login", "Account");
         }
 
@@ -158,6 +171,56 @@ namespace FlashcardApp.Controllers
                 Email = user.Email,
                 TaskCount = flashCardCount
             };
+
+            return View(model);
+        }
+
+        [Authorize(Policy ="RequireCookie")]
+        public async Task<IActionResult> EditProfile()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return NotFound("User not found.");
+
+            var model = new ProfileViewModel
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email
+            };
+
+            return View(model);
+        }
+         [HttpPost]
+        [Authorize(Policy ="RequireCookie")]
+
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditProfile(ProfileViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        Console.WriteLine(modelError.ErrorMessage);
+                    }
+                return View(model);
+            }
+
+            var user = await _userManager.FindByIdAsync(model.Id);
+            if (user == null)
+                return NotFound("User not found.");
+
+            user.FirstName = model.FirstName;
+            user.LastName = model.LastName;
+            user.Email = model.Email;
+
+        var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
+                return RedirectToAction("ViewProfile","Account");
+
+            foreach (var error in result.Errors)
+                ModelState.AddModelError(string.Empty, error.Description);
 
             return View(model);
         }

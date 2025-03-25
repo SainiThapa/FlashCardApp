@@ -7,6 +7,7 @@ using FlashcardApp.Services;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.ClaimsIdentity.RoleClaimType = ClaimTypes.Role;
+});
 
 
 builder.Services.AddScoped<AccountService>();
@@ -40,6 +46,8 @@ builder.Services.AddAuthentication(options =>
     AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
     {
         options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+
     })
     .AddJwtBearer(options =>
     {
@@ -56,14 +64,15 @@ builder.Services.AddAuthentication(options =>
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
+            RoleClaimType = System.Security.Claims.ClaimTypes.Role 
         };
     });
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("RequireJwt", policy =>
         policy.RequireAuthenticatedUser().AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme));
-
+    // options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
     options.AddPolicy("RequireCookie", policy =>
         policy.RequireAuthenticatedUser().AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme));
 });
@@ -108,10 +117,17 @@ static async Task SeedRolesAsync(IServiceProvider serviceProvider)
 
     foreach (var roleName in roleNames)
     {
-        var roleExist = await roleManager.RoleExistsAsync(roleName);
-        if (!roleExist)
+        if (!await roleManager.RoleExistsAsync(roleName))
         {
-            roleResult = await roleManager.CreateAsync(new IdentityRole(roleName));
+            var result = await roleManager.CreateAsync(new IdentityRole(roleName));
+            if (result.Succeeded)
+            {
+                Console.WriteLine($"Role '{roleName}' created successfully.");
+            }
+            else
+            {
+                Console.WriteLine($"Error creating role '{roleName}': {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            }
         }
     }
 
@@ -151,7 +167,16 @@ static async Task SeedRolesAsync(IServiceProvider serviceProvider)
     }
     else
     {
-        Console.WriteLine("Admin user already exists.");
+         Console.WriteLine("Admin user already exists.");
+        if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
+        {
+            await userManager.AddToRoleAsync(adminUser, "Admin");
+            Console.WriteLine("Admin user assigned to Admin role.");
+        }
+        else
+        {
+            Console.WriteLine("Admin user already assigned to Admin role.");
+        }
     }
 }
 

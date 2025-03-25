@@ -4,60 +4,149 @@
     ViewData["Title"] = "Manage Categories";
 }
 
-<h2>Manage Categories</h2>
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
-}
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
-}
+<div class="container mt-5">
+    <div class="row justify-content-md-center">
+        <div class="col-md-8">
+            <h2 class="text-center mb-4">Manage Categories</h2>
 
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="AddCategory" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            
-            <div class="form-group">
-                <label asp-for="NewCategory.Name" class="control-label">Category Name</label>
-                <input asp-for="NewCategory.Name" class="form-control" />
-                <span asp-validation-for="NewCategory.Name" class="text-danger"></span>
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+            }
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">Add New Category</h4>
+                    <form asp-action="AddCategory" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <label asp-for="NewCategory.Name" class="control-label">Category Name</label>
+                            <input asp-for="NewCategory.Name" class="form-control" />
+                            <span asp-validation-for="NewCategory.Name" class="text-danger"></span>
+                        </div>
+                        <div class="form-group text-center">
+                            <input type="submit" value="Add Category" class="btn btn-lg btn-primary w-100" />
+                        </div>
+                    </form>
+                </div>
             </div>
 
-            <div class="form-group">
-                <input type="submit" value="Add Category" class="btn btn-primary" />
+            <h3 class="text-center mb-4">Existing Categories</h3>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover table-bordered shadow-sm rounded">
+                    <thead class="bg-primary text-white">
+                        <tr>
+                            <th>Name</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var category in Model.Categories)
+                        {
+                            <tr>
+                                <td>@category.Name</td>
+                                <td class="text-center">
+                                    <a asp-action="EditCategory" asp-route-id="@category.Id" class="btn btn-sm btn-warning">Edit</a>
+                                    <a asp-action="DeleteCategory" asp-route-id="@category.Id" class="btn btn-sm btn-danger">Delete</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
-        </form>
-    </div>
-</div>
-
-<div class="row mt-4">
-    <div class="col-md-8">
-        <h3>Existing Categories</h3>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var category in Model.Categories)
-                {
-                    <tr>
-                        <td>@category.Name</td>
-                        <td>
-                            <a asp-action="EditCategory" asp-route-id="@category.Id" class="btn btn-sm btn-warning">Edit</a>
-                            <a asp-action="DeleteCategory" asp-route-id="@category.Id" class="btn btn-sm btn-danger">Delete</a>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        </div>
     </div>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 }
+
+<style>
+    .container {
+        max-width: 800px;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+        font-size: 2.5rem;
+        color: #343a40;
+    }
+
+    .card {
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        color: #343a40;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+    }
+
+    .btn-warning {
+        background-color: #ffc107;
+        border-color: #ffc107;
+    }
+
+    .btn-warning:hover {
+        background-color: #e0a800;
+        border-color: #e0a800;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+        border-color: #c82333;
+    }
+
+    .table {
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 0;
+    }
+
+    .table thead {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    .table th,
+    .table td {
+        vertical-align: middle;
+        padding: 15px;
+    }
+
+    .table-striped tbody tr:nth-child(odd) {
+        background-color: #e9ecef;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #dee2e6;
+    }
+</style>
+```` 
