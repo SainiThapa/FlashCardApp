@@ -24,6 +24,7 @@
                     <input asp-for="Email" class="form-control" />
                     <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
+
                 <div class="form-group">
                     <label asp-for="Password" class="control-label"></label>
                     <input asp-for="Password" class="form-control" type="password" />
@@ -35,6 +36,8 @@
                     <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                 </div>
                 <button type="submit" class="btn btn-lg btn-primary w-100">Register</button>
+                <br>
+                <p style="color: red;">*Password must contain at least 8 characters with uppercase, lowercase letters, numbers, and special symbols.</p>
             </form>
         </div>
     </div>
