@@ -81,7 +81,17 @@ namespace FlashcardApp.Services
         {
             return await _context.FlashCards.FindAsync(id); // Removed exception, returning null if not found
         }
+        public async Task CreateFlashCardAsync(FlashCard flashCard)
+        {
+            _context.FlashCards.Add(flashCard);
+            await _context.SaveChangesAsync();
+        }
 
+        public async Task ModifyFlashCardAsync(FlashCard flashCard)
+        {
+            _context.FlashCards.Update(flashCard);
+            await _context.SaveChangesAsync();
+        }
         public async Task<FlashCardViewModel> GetRandomFlashCardAsync(string userId, int? categoryId = null)
         {
             var flashCards = await GetUserFlashCardsAsync(userId);

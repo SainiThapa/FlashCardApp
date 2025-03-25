@@ -12,6 +12,7 @@ using FlashcardApp.Data;
 using Microsoft.EntityFrameworkCore;
 using FlashcardApp.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace FlashcardApp.Controllers
 {
@@ -78,6 +79,83 @@ namespace FlashcardApp.Controllers
             ViewBag.CategoryNames = await _adminService.GetAllCategoriesAsync(); 
             return View(flashCards);
         }
+
+    [HttpGet]
+    public async Task<IActionResult> CreateFlashCard(string userId)
+    {
+        if (string.IsNullOrEmpty(userId))
+            return NotFound("User ID is missing or invalid.");
+
+        var categories = await _adminService.GetAllCategoriesAsync();
+        var viewModel = new AdminUserFlashCardViewModel
+        {
+            UserId = userId,
+            Categories = categories.Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name }).ToList()
+        };
+        return View(viewModel);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateFlashCard(AdminUserFlashCardViewModel model)
+    {
+        if (ModelState.IsValid)
+        {
+            var flashCard = new FlashCard
+            {
+                UserId = model.UserId,
+                CategoryId = model.CategoryId,
+                Question = model.Question,
+                Answer = model.Answer
+            };
+            await _flashCardService.CreateFlashCardAsync(flashCard);
+            return RedirectToAction(nameof(UserFlashCards), new { userId = model.UserId });
+        }
+
+        model.Categories = (await _adminService.GetAllCategoriesAsync())
+                            .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name }).ToList();
+        return View(model);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> EditFlashCard(int id)
+    {
+        var flashCard = await _flashCardService.GetFlashCardByIdAsync(id);
+        if (flashCard == null)
+            return NotFound("Flashcard not found.");
+
+        var categories = await _adminService.GetAllCategoriesAsync();
+        var viewModel = new AdminUserFlashCardViewModel
+        {
+            Id = flashCard.Id,
+            UserId = flashCard.UserId,
+            CategoryId = flashCard.CategoryId,
+            Question = flashCard.Question,
+            Answer = flashCard.Answer,
+            Categories = categories.Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name }).ToList()
+        };
+        return View(viewModel);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> EditFlashCard(AdminUserFlashCardViewModel model)
+    {
+        if (ModelState.IsValid)
+        {
+            var flashCard = new FlashCard
+            {
+                Id = model.Id,
+                UserId = model.UserId,
+                CategoryId = model.CategoryId,
+                Question = model.Question,
+                Answer = model.Answer
+            };
+            await _flashCardService.ModifyFlashCardAsync(flashCard);
+            return RedirectToAction(nameof(UserFlashCards), new { userId = model.UserId });
+        }
+        model.Categories = (await _adminService.GetAllCategoriesAsync())
+                            .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name }).ToList();
+        return View(model);
+    }
 
         [HttpPost]
         public async Task<IActionResult> DeleteSelectedFlashCards(List<int> flashCardIds, string userId)

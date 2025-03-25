@@ -17,6 +17,7 @@
                         <th class="text-center">Category</th>
                         <th class="text-center">Question</th>
                         <th class="text-center">Answer</th>
+                        <th class="text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -29,6 +30,9 @@
                             <td>@flashCard.Category.Name</td>
                             <td>@flashCard.Question</td>
                             <td>@flashCard.Answer</td>
+                            <td class="text-center">
+                                <a asp-action="EditFlashCard" asp-route-id="@flashCard.Id" class="btn btn-sm btn-warning">Edit</a>
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -40,6 +44,10 @@
             <a href="@Url.Action("UserList", "Admin")" class="btn btn-lg btn-secondary w-48">Back to User List</a>
         </div>
     </form>
+
+    <div class="text-center mt-4">
+        <a asp-action="CreateFlashCard" asp-route-userId="@userId" class="btn btn-lg btn-primary">Create New Flashcard</a>
+    </div>
 </div>
 
 <style>
@@ -121,6 +129,16 @@
     .btn-secondary:hover {
         background-color: #5a6268;
         border-color: #5a6268;
+    }
+
+    .btn-warning {
+        background-color: #ffc107;
+        border-color: #ffc107;
+    }
+
+    .btn-warning:hover {
+        background-color: #e0a800;
+        border-color: #e0a800;
     }
 
     .w-48 {

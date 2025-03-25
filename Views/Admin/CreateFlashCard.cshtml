@@ -1,0 +1,88 @@
+@model FlashcardApp.ViewModels.AdminUserFlashCardViewModel
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Create Flash Card</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg">
+                <div class="card-body">
+                    <form asp-action="CreateFlashCard" method="post">
+                        <input type="hidden" asp-for="UserId" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        <div class="form-group">
+                            <label asp-for="CategoryId" class="control-label">Category</label>
+                            <select asp-for="CategoryId" class="form-control" asp-items="Model.Categories">
+                                <option value="">Select a category</option>
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Question" class="control-label">Question</label>
+                            <input asp-for="Question" class="form-control" />
+                            <span asp-validation-for="Question" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Answer" class="control-label">Answer</label>
+                            <input asp-for="Answer" class="form-control" />
+                            <span asp-validation-for="Answer" class="text-danger"></span>
+                        </div>
+                        <div class="form-group text-center mt-4">
+                            <input type="submit" value="Create" class="btn btn-lg btn-primary w-100" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <a asp-action="UserFlashCards" asp-route-userId="@Model.UserId" class="btn btn-lg btn-secondary">Back to Flashcards</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}
+
+<style>
+    .container {
+        max-width: 600px;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+        font-size: 2.5rem;
+        color: #343a40;
+    }
+
+    .card {
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        border-color: #5a6268;
+    }
+</style>
