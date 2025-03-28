@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿
+    @using System.Security.Claims
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<FlashcardApp.Models.ApplicationUser> UserManager
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -36,11 +40,19 @@
                         }
                         else
                         {
+                             <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="FlashCards" asp-action="randomflashcard">Random Flashcards</a>
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="FlashCards" asp-action="Create">Create Flashcards</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="ViewProfile">Welcome, @User.Identity.Name</a>
+                                @{
+                                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                                var user = await UserManager.FindByIdAsync(userId);
+                                var firstName = user?.FirstName;
+                                }
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="ViewProfile">Welcome, @firstName</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="ResetPassword">Change Password</a>

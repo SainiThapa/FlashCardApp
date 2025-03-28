@@ -112,6 +112,47 @@ namespace FlashcardApp.Controllers
             return RedirectToAction("Login", "Account");
         }
 
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        // POST: ForgotPassword
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(Forgot_PasswordViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null || user.FirstName != model.FirstName || user.LastName != model.LastName)
+            {
+                ModelState.AddModelError(string.Empty, "User not found. Please check your details.");
+                return View(model);
+            }
+
+            string resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, resetToken, model.NewPassword);
+
+            if (result.Succeeded)
+            {
+                user.PlainTextPassword = model.NewPassword;
+                await _userManager.UpdateAsync(user);
+
+                await _signInManager.SignOutAsync();
+                ViewBag.Message = "Password reset successful.";
+                return View();
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            return View(model);
+        }
+
         //Reset Password - GET
         [HttpGet]
         [Authorize(Policy = "RequireCookie")]

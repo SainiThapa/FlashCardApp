@@ -32,6 +32,10 @@ build_property.EnableCodeStyleSeverity =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxFZGl0UHJvZmlsZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[c:/Users/DELL/XAM-Project/FlashCardApp/FlashCardApp/Views/Account/ForgotPassword.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxGb3Jnb3RQYXNzd29yZC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [c:/Users/DELL/XAM-Project/FlashCardApp/FlashCardApp/Views/Account/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxMb2dpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -110,6 +114,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [c:/Users/DELL/XAM-Project/FlashCardApp/FlashCardApp/Views/FlashCards/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRmxhc2hDYXJkc1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[c:/Users/DELL/XAM-Project/FlashCardApp/FlashCardApp/Views/FlashCards/RandomFlashCard.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRmxhc2hDYXJkc1xSYW5kb21GbGFzaENhcmQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [c:/Users/DELL/XAM-Project/FlashCardApp/FlashCardApp/Views/Home/Index.cshtml]

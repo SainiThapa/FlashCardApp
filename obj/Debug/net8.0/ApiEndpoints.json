@@ -17,6 +17,32 @@
   },
   {
     "ContainingType": "FlashcardApp.Controllers.AccountApiController",
+    "Method": "ForgotPassword",
+    "RelativePath": "api/AccountApi/forgot-password",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "FlashcardApp.ViewModels.APIViewModels.ForgotPasswordViewModel",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FlashcardApp.Controllers.AccountApiController",
+    "Method": "IsAdmin",
+    "RelativePath": "api/AccountApi/is-admin",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FlashcardApp.Controllers.AccountApiController",
     "Method": "Login",
     "RelativePath": "api/AccountApi/login",
     "HttpMethod": "POST",
@@ -52,22 +78,6 @@
       {
         "Name": "model",
         "Type": "FlashcardApp.ViewModels.APIViewModels.RegisterAPIViewModel",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "FlashcardApp.Controllers.AccountApiController",
-    "Method": "UpdateProfile",
-    "RelativePath": "api/AccountApi/updateProfile",
-    "HttpMethod": "PUT",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "model",
-        "Type": "FlashcardApp.ViewModels.APIViewModels.UpdateProfileViewModel",
         "IsRequired": true
       }
     ],
@@ -112,16 +122,6 @@
   },
   {
     "ContainingType": "FlashcardApp.Controllers.AccountApiController",
-    "Method": "GetUserId",
-    "RelativePath": "api/AccountApi/userId",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "FlashcardApp.Controllers.AccountApiController",
     "Method": "GetAllUsers",
     "RelativePath": "api/AccountApi/users",
     "HttpMethod": "GET",
@@ -142,99 +142,31 @@
   },
   {
     "ContainingType": "FlashcardApp.Controllers.AccountApiController",
-    "Method": "GetUser",
-    "RelativePath": "api/AccountApi/users/{userId}",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "userId",
-        "Type": "System.String",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "FlashcardApp.Controllers.AccountApiController",
-    "Method": "CreateFlashCard",
-    "RelativePath": "api/AccountApi/users/{userId}/createFlashCard",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "userId",
-        "Type": "System.String",
-        "IsRequired": true
-      },
-      {
-        "Name": "model",
-        "Type": "FlashcardApp.ViewModels.APIViewModels.CreateFlashCardViewModel",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "FlashcardApp.Controllers.AccountApiController",
-    "Method": "DeleteFlashCards",
-    "RelativePath": "api/AccountApi/users/{userId}/deleteFlashCards",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "userId",
-        "Type": "System.String",
-        "IsRequired": true
-      },
-      {
-        "Name": "flashCardIds",
-        "Type": "System.Collections.Generic.List\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "FlashcardApp.Controllers.AccountApiController",
-    "Method": "GetUserDetails",
-    "RelativePath": "api/AccountApi/users/{userId}/details",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "userId",
-        "Type": "System.String",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "FlashcardApp.Controllers.AccountApiController",
-    "Method": "UpdateFlashCard",
-    "RelativePath": "api/AccountApi/users/{userId}/updateFlashCard/{id}",
+    "Method": "UpdateUser",
+    "RelativePath": "api/AccountApi/users/update",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "userId",
-        "Type": "System.String",
-        "IsRequired": true
-      },
-      {
-        "Name": "id",
-        "Type": "System.Int32",
-        "IsRequired": true
-      },
-      {
         "Name": "model",
-        "Type": "FlashcardApp.ViewModels.APIViewModels.UpdateFlashCardViewModel",
+        "Type": "FlashcardApp.ViewModels.APIViewModels.UpdateProfileViewModel",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AdminApiController",
+    "Method": "BulkDeleteUsers",
+    "RelativePath": "api/adminapi/bulk-delete-users",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "BulkDeleteUsersRequest",
         "IsRequired": true
       }
     ],
@@ -321,6 +253,47 @@
   },
   {
     "ContainingType": "AdminApiController",
+    "Method": "DownloadAllFlashCardsWithOwners",
+    "RelativePath": "api/adminapi/download-all-flashcards",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AdminApiController",
+    "Method": "DownloadUserFlashCardsSummary",
+    "RelativePath": "api/adminapi/download-user-flashcards",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AdminApiController",
+    "Method": "UpdateUserPassword",
+    "RelativePath": "api/adminapi/user/{email}/updatePassword",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "email",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "model",
+        "Type": "FlashcardApp.ViewModels.APIViewModels.UpdateUserViewModel",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AdminApiController",
     "Method": "GetUsers",
     "RelativePath": "api/adminapi/users",
     "HttpMethod": "GET",
@@ -347,27 +320,6 @@
   },
   {
     "ContainingType": "AdminApiController",
-    "Method": "UpdateUser",
-    "RelativePath": "api/adminapi/users/{id}",
-    "HttpMethod": "PUT",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.String",
-        "IsRequired": true
-      },
-      {
-        "Name": "model",
-        "Type": "FlashcardApp.ViewModels.APIViewModels.UpdateProfileViewModel",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "AdminApiController",
     "Method": "DeleteUser",
     "RelativePath": "api/adminapi/users/{id}",
     "HttpMethod": "DELETE",
@@ -377,6 +329,122 @@
       {
         "Name": "id",
         "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AdminApiController",
+    "Method": "GetUserDetails",
+    "RelativePath": "api/adminapi/Users/{userId}/details",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AdminApiController",
+    "Method": "GetUserFlashcards",
+    "RelativePath": "api/adminapi/users/{userId}/flashcards",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AdminApiController",
+    "Method": "CreateFlashcard",
+    "RelativePath": "api/adminapi/users/{userId}/flashcards",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "model",
+        "Type": "FlashcardApp.ViewModels.APIViewModels.CreateFlashCardViewModel",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AdminApiController",
+    "Method": "UpdateFlashcard",
+    "RelativePath": "api/adminapi/users/{userId}/flashcards/{flashcardId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "flashcardId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "model",
+        "Type": "FlashcardApp.ViewModels.APIViewModels.UpdateFlashCardViewModel",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AdminApiController",
+    "Method": "DeleteFlashcard",
+    "RelativePath": "api/adminapi/users/{userId}/flashcards/{flashcardId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "flashcardId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AdminApiController",
+    "Method": "GetUserFlashcard",
+    "RelativePath": "api/adminapi/users/flashcards/{flashcardId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "flashcardId",
+        "Type": "System.Int32",
         "IsRequired": true
       }
     ],

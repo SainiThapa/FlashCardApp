@@ -187,5 +187,37 @@ namespace FlashcardApp.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+
+        public async Task<IActionResult> RandomFlashCard()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User ID not found.");
+
+            var flashCards = await _flashCardService.GetUserFlashCardsAsync(userId);
+            if (flashCards == null || !flashCards.Any())
+                return NotFound("No flashcards found for the user.");
+
+            var random = new Random();
+            var randomFlashCard = flashCards.OrderBy(x => random.Next()).FirstOrDefault();
+
+            if (randomFlashCard == null)
+                return NotFound("Unable to retrieve a random flashcard.");
+
+            var category = await _context.Categories
+                .FirstOrDefaultAsync(c => c.Id == randomFlashCard.CategoryId);
+
+            var viewModel = new FlashCardViewModel
+            {
+                Id = randomFlashCard.Id,
+                CategoryId = randomFlashCard.CategoryId,
+                CategoryName = category?.Name ?? "Unknown",
+                Question = randomFlashCard.Question,
+                Answer = randomFlashCard.Answer
+            };
+
+            return View(viewModel);
+        }
     }
 }
