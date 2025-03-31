@@ -13,6 +13,8 @@ using CsvHelper;
 using System.Globalization;
 using System.Text;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using PdfSharp.Pdf;
+using PdfSharp.Drawing;
 
 [Authorize]//(Roles = "Admin")
 [Route("api/adminapi")]
@@ -327,44 +329,86 @@ public class AdminApiController : ControllerBase
             // Return the found flashcard
             return Ok(flashcard);
         }
-
-        //Generate CSV Reports
         [HttpGet("download-user-flashcards")]
         public async Task<IActionResult> DownloadUserFlashCardsSummary()
         {
             var usersFlashCards = await _adminService.GetUserFlashCardsSummaryAsync();
 
-            var csvStream = GenerateCSVStream(usersFlashCards);
-            return File(csvStream, "text/csv", "UserFlashCardsSummary.csv");        }
+            var pdfStream = GenerateUserFlashCardsPDF(usersFlashCards);
+            return File(pdfStream, "application/pdf", "UserFlashCardsSummary.pdf");        
+        }
 
         [HttpGet("download-all-flashcards")]
         public async Task<IActionResult> DownloadAllFlashCardsWithOwners()
         {
             var flashCardsWithOwners = await _adminService.GetAllFlashCardsWithOwnerAsync();
-            var csvStream = GenerateCSVStream(flashCardsWithOwners);
-            return File(csvStream, "text/csv", "AllFlashCardsWithOwners.csv");
+            var pdfStream = GenerateAllFlashCardsPDF(flashCardsWithOwners);
+            return File(pdfStream, "application/pdf", "AllFlashCardsWithOwners.pdf");
         }
-        private MemoryStream GenerateCSVStream<T>(List<T> data)
+
+         private MemoryStream GenerateUserFlashCardsPDF(List<UserFlashCardsSummaryViewModel> usersFlashCards)
         {
             var memoryStream = new MemoryStream();
-            using (var writer = new StreamWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
+            var document = new PdfDocument();
+            var page = document.AddPage();
+            var graphics = XGraphics.FromPdfPage(page);
+            var font = new XFont("Verdana", 10, XFontStyleEx.Regular);
+            int yPoint = 40;
+            
+            graphics.DrawString("Users Summary Report", new XFont("Verdana", 14, XFontStyleEx.Bold), XBrushes.Black, new XRect(20, 20, page.Width - 40, page.Height - 40), XStringFormats.TopLeft);
+            
+            foreach (var user in usersFlashCards)
             {
-                using (var csvWriter = new CsvHelper.CsvWriter(writer, System.Globalization.CultureInfo.InvariantCulture))
-                {
-                    csvWriter.WriteRecords(data);
-                }
+                int flashCardCount = user.FlashCards.Count;
+                graphics.DrawString($"User ID: {user.UserId}", font, XBrushes.Black, new XRect(20, yPoint, page.Width - 40, page.Height - 40), XStringFormats.TopLeft);
+                yPoint += 20;
+                graphics.DrawString($"Name: {user.FirstName} {user.LastName}", font, XBrushes.Black, new XRect(20, yPoint, page.Width - 40, page.Height - 40), XStringFormats.TopLeft);
+                yPoint += 20;
+                graphics.DrawString($"Email: {user.Email}", font, XBrushes.Black, new XRect(20, yPoint, page.Width - 40, page.Height - 40), XStringFormats.TopLeft);
+                yPoint += 20;
+                graphics.DrawString($"Flashcards Count: {flashCardCount}", font, XBrushes.Gray, new XRect(40, yPoint, page.Width - 60, page.Height - 40), XStringFormats.TopLeft);
+                yPoint += 30;
             }
-            memoryStream.Position = 0; // Reset stream position for download
+            
+            document.Save(memoryStream, false);
+            memoryStream.Position = 0;
             return memoryStream;
         }
 
-    private async Task EnsureRoleExistsAsync(string roleName)
-    {
-        if (!await _roleManager.RoleExistsAsync(roleName))
-            await _roleManager.CreateAsync(new IdentityRole(roleName));
+
+        private MemoryStream GenerateAllFlashCardsPDF(List<FlashCardWithOwnerViewModel> flashCardsWithOwners)
+        {
+            var memoryStream = new MemoryStream();
+            var document = new PdfDocument();
+            var page = document.AddPage();
+            var graphics = XGraphics.FromPdfPage(page);
+            var font = new XFont("Verdana", 10, XFontStyleEx.Regular);
+            int yPoint = 40;
+            
+            graphics.DrawString("User's Flash Cards report", new XFont("Verdana", 14, XFontStyleEx.Bold), XBrushes.Black, new XRect(20, 20, page.Width - 40, page.Height - 40), XStringFormats.TopLeft);
+            
+            foreach (var flashcard in flashCardsWithOwners)
+            {
+                graphics.DrawString($"{flashcard.CategoryName}: {flashcard.Question} - {flashcard.Answer}", font, XBrushes.Black, new XRect(20, yPoint, page.Width - 40, page.Height - 40), XStringFormats.TopLeft);
+                yPoint += 20;
+                graphics.DrawString($"Owner: {flashcard.Owner_FullName} ({flashcard.OwnerEmail})", font, XBrushes.Gray, new XRect(40, yPoint, page.Width - 60, page.Height - 40), XStringFormats.TopLeft);
+                yPoint += 30;
+            }
+            
+            document.Save(memoryStream, false);
+            memoryStream.Position = 0;
+            return memoryStream;
+        }
+
+
+
+        private async Task EnsureRoleExistsAsync(string roleName)
+        {
+            if (!await _roleManager.RoleExistsAsync(roleName))
+                await _roleManager.CreateAsync(new IdentityRole(roleName));
+        }
     }
-}
-public class BulkDeleteUsersRequest
-{
-    public List<string> UserIds { get; set; }
-}
+    public class BulkDeleteUsersRequest
+    {
+        public List<string> UserIds { get; set; }
+    }

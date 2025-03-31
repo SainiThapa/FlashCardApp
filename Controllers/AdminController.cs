@@ -13,6 +13,8 @@ using Microsoft.EntityFrameworkCore;
 using FlashcardApp.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using PdfSharp.Pdf;
+using PdfSharp.Drawing;
 
 namespace FlashcardApp.Controllers
 {
@@ -350,35 +352,74 @@ namespace FlashcardApp.Controllers
             return View(model);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> DownloadUserFlashCardsSummary()
+        public async Task<FileResult> DownloadUserFlashCardsSummary()
         {
             var usersFlashCards = await _adminService.GetUserFlashCardsSummaryAsync();
-            var stream = new MemoryStream();
-            var writer = new StreamWriter(stream);
-            var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture);
-
-            csvWriter.WriteRecords(usersFlashCards);
-            writer.Flush();
-            stream.Position = 0;
-
-            return File(stream, "text/csv", "UserFlashCardsSummary.csv");
+            var pdfStream = GenerateUserFlashCardsPDF(usersFlashCards);
+            return File(pdfStream, "application/pdf", "UserSummaryReport.pdf");        
         }
 
-        [HttpGet]
-        public async Task<IActionResult> DownloadAllFlashCardsWithOwners()
+        public async Task<FileResult> DownloadAllFlashCardsWithOwners()
         {
             var flashCardsWithOwners = await _adminService.GetAllFlashCardsWithOwnerAsync();
-            var stream = new MemoryStream();
-            var writer = new StreamWriter(stream);
-            var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture);
-
-            csvWriter.WriteRecords(flashCardsWithOwners);
-            writer.Flush();
-            stream.Position = 0;
-
-            return File(stream, "text/csv", "AllFlashCardsWithOwners.csv");
+            var pdfStream = GenerateAllFlashCardsPDF(flashCardsWithOwners);
+            return File(pdfStream, "application/pdf", "FlashCardsReports.pdf");
         }
+
+        private MemoryStream GenerateUserFlashCardsPDF(List<UserFlashCardsSummaryViewModel> usersFlashCards)
+        {
+            var memoryStream = new MemoryStream();
+            var document = new PdfDocument();
+            var page = document.AddPage();
+            var graphics = XGraphics.FromPdfPage(page);
+            var font = new XFont("Verdana", 10, XFontStyleEx.Regular);
+            int yPoint = 40;
+            
+            graphics.DrawString("Users Summary Report", new XFont("Verdana", 14, XFontStyleEx.Bold), XBrushes.Black, new XRect(20, 20, page.Width - 40, page.Height - 40), XStringFormats.TopLeft);
+            
+            foreach (var user in usersFlashCards)
+            {
+                int flashCardCount = user.FlashCards.Count;
+                graphics.DrawString($"User ID: {user.UserId}", font, XBrushes.Black, new XRect(20, yPoint, page.Width - 40, page.Height - 40), XStringFormats.TopLeft);
+                yPoint += 20;
+                graphics.DrawString($"Name: {user.FirstName} {user.LastName}", font, XBrushes.Black, new XRect(20, yPoint, page.Width - 40, page.Height - 40), XStringFormats.TopLeft);
+                yPoint += 20;
+                graphics.DrawString($"Email: {user.Email}", font, XBrushes.Black, new XRect(20, yPoint, page.Width - 40, page.Height - 40), XStringFormats.TopLeft);
+                yPoint += 20;
+                graphics.DrawString($"Flashcards Count: {flashCardCount}", font, XBrushes.Gray, new XRect(40, yPoint, page.Width - 60, page.Height - 40), XStringFormats.TopLeft);
+                yPoint += 30;
+            }
+            
+            document.Save(memoryStream, false);
+            memoryStream.Position = 0;
+            return memoryStream;
+        }
+
+
+        private MemoryStream GenerateAllFlashCardsPDF(List<FlashCardWithOwnerViewModel> flashCardsWithOwners)
+        {
+            var memoryStream = new MemoryStream();
+            var document = new PdfDocument();
+            var page = document.AddPage();
+            var graphics = XGraphics.FromPdfPage(page);
+            var font = new XFont("Verdana", 10, XFontStyleEx.Regular);
+            int yPoint = 40;
+            
+            graphics.DrawString("User's Flash Cards report", new XFont("Verdana", 14, XFontStyleEx.Bold), XBrushes.Black, new XRect(20, 20, page.Width - 40, page.Height - 40), XStringFormats.TopLeft);
+            
+            foreach (var flashcard in flashCardsWithOwners)
+            {
+                graphics.DrawString($"{flashcard.CategoryName}: {flashcard.Question} - {flashcard.Answer}", font, XBrushes.Black, new XRect(20, yPoint, page.Width - 40, page.Height - 40), XStringFormats.TopLeft);
+                yPoint += 20;
+                graphics.DrawString($"Owner: {flashcard.Owner_FullName} ({flashcard.OwnerEmail})", font, XBrushes.Gray, new XRect(40, yPoint, page.Width - 60, page.Height - 40), XStringFormats.TopLeft);
+                yPoint += 30;
+            }
+            
+            document.Save(memoryStream, false);
+            memoryStream.Position = 0;
+            return memoryStream;
+        }
+
 
         public IActionResult AddUser() => View();
 
